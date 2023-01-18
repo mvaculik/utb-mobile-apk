@@ -13,10 +13,37 @@ export default function App() {
   return (
     <NavigationContainer>
     <Stack.Navigator>
-      <Stack.Screen name="Home" component={HomePage} />
-      <Stack.Screen name="User" component={UserPage} />
+    <Stack.Screen
+        name="Home"
+        component={HomePage}
+        options={{
+          title: 'First screen',
+          headerTitleStyle: styles.headerTitle,
+          headerStyle: styles.header,
+        }}
+      />
+      <Stack.Screen
+        name="User"
+        component={UserPage}
+        options={{
+          title: 'Profile',
+          headerTitleStyle: styles.headerTitle,
+          headerStyle: styles.header,
+        }}
+      />
     </Stack.Navigator>
   </NavigationContainer>
   );
 }
 
+
+const styles = StyleSheet.create({
+  header: {
+    backgroundColor: '#181818',
+  },
+  headerTitle: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 20,
+  },
+});
