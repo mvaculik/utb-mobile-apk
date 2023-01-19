@@ -1,152 +1,140 @@
 import React from 'react'
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, Image, ScrollView } from 'react-native';
-import { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, Image, ScrollView, TextInput, Button } from 'react-native';
+import { useState, useEffect, useCallback } from 'react';
+import { AsyncStorage, FlatList } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
+
 
 
 function HomeScreen({navigation}) {
-    
-  const [firstData, setFirstData] = useState([]);
-  const [secondData, setSecondData] = useState([]);
 
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
-
-  let nickname = "kamijuny";
-  let playerId = "0f14db6f-5fb8-4537-a771-49b7787e093b";
-
-  const handlePress = async () => {
-    setLoading(true);
-    try {
-
-		// get first data
-        const responseFirstData = await fetch(`https://open.faceit.com/data/v4/players?nickname=${nickname}`, {
-          method: 'GET',
-          headers: {
-              'accept': 'application/json',
-              'Authorization': 'Bearer e2a920ef-9c10-4b02-a02b-a62a4c8b6658',
-          }
-        });
-
-		const fData = await responseFirstData.json();
-			//console.log("fData => ", fData);
-		setFirstData(fData);
-
-
-		// get second data
-		const responseSecondData = await fetch(`https://open.faceit.com/data/v4/players/${playerId}`, {
-			method: "GET",
-			headers: {
-			  "accept": "application/json",
-			  "Authorization": "Bearer e2a920ef-9c10-4b02-a02b-a62a4c8b6658"
-			}
-        });
-
-		const sData = await responseSecondData.json();
-        	console.log("sData => ", sData);
-		setSecondData(sData);
-
-
-
-    } catch (error) {
-        setError(error);
-    }
-    setLoading(false);
+	const navig = useNavigation();
 	
-  };
+	const [user, setUser] = useState();
+	const [data, setData] = useState([])
 
 
+	useEffect(() => {
+		getItem();
+		const unsubscribe = navig.addListener('focus', getItem);
+		return unsubscribe;
+	}, []);
+
+
+
+	async function getItem() {
+		try {
+			// Retrieve the current array from AsyncStorage
+			const existingArray = await AsyncStorage.getItem('testovacka');
+			let currentArray = existingArray ? JSON.parse(existingArray) : [];
+
+			setData(currentArray);
+
+			return data;
+
+		} catch (error) {
+			console.log(error);
+		}
+	}
+
+	console.log(data);
 
 
   return (
-	<SafeAreaView style={styles.all}>
-		<View>
-				<Image source={{uri: secondData.cover_image }} style={styles.backgroundImg} />
-						
-				<Image source={{uri: firstData.avatar }} style={styles.profileImg} />
-						
-		</View>
-		<View style={styles.topContent}>
-					<Text style={styles.topContentText}>{firstData ? firstData.nickname : ''}</Text>
-		</View>
+	
 		<View style={styles.content}>
-			<ScrollView>
-					<TouchableOpacity onPress={handlePress}>
-						<Text>{loading ? 'Loading...' : 'GET DATA'}</Text>
-						</TouchableOpacity>
+		
+					<TextInput
+						style={styles.input}
+						placeholder="Search user"
+						placeholderTextColor='#f50'
+						onChangeText={setUser}
+						value={user}
+						/>
+					<TouchableOpacity 
+						style={styles.btn}
+						onPress={() => navigation.navigate('User', {paramKey : user})}
+						><Text>Search</Text>
+					</TouchableOpacity>
 
-					
-							
-					
-					
+			<ScrollView>	
 
+					<View style={styles.savedProfiles}>
+						{data.map((item) => 
+							<TouchableOpacity 
+								style={styles.gameCard}
+								onPress={() => navigation.navigate('User', {paramKey : item})}
+							>
+								<Text
+									style={styles.profileText}
+								>{item} </Text>
+							</TouchableOpacity>
+						)}
+					</View>
 					
-			</ScrollView>
-		</View>
-	</SafeAreaView>
+		</ScrollView>
+					</View>
   )
 }
+
 
 export default HomeScreen
 
 
 
-var styles = StyleSheet.create({
-
-	all: {
-		backgroundColor: '#181818'
-	},
-
-	backgroundImg: {
-		width: 400,
-		height: 200,
-		resizeMode: 'cover', // or 'stretch'
-		borderBottomWidth: 10,
-    	borderBottomColor: '#a2c',
-		opacity: '0.6'
-	},
-
-	profileImg: {
-		width: 150,
-		height: 150,
-		resizeMode: 'cover', // or 'stretch'
-		borderRadius: 75,
-		overflow: 'hidden',
-		alignSelf: 'center',
-		position: 'absolute',
-		zIndex: 100,
-		top: 110,
-		borderWidth: 2,
-		borderColor: '#000',
-
-	},
-  
-	topContent: {
-		position: 'relative',
-		zIndex: -1,
-		alignItems: 'center',
-		justifyContent: 'center',
-		borderTopWidth: 3,
-    	borderTopColor: '#f50',
-		backgroundColor: '#181818',
-		height: 130
-	},
-  
-	topContentText: {
-		color: '#fff',
-		fontSize: '22px',
-		fontWeight: '500',
-		paddingTop: 50,
-	},
+const styles = StyleSheet.create({
+    input: {
+		width: '100%',
+        borderColor: '#f50',
+        borderWidth: 1,
+        padding: 15,
+		color: '#f50'
+    },
 
 	content: {
-		position: 'relative',
-		zIndex: -1,
-		alignItems: 'center',
+		width: '100%',
+		height: '100%',
+		backgroundColor: '#161616',
+		padding: 20,
 		justifyContent: 'center',
-		borderTopWidth: 2,
-    	borderTopColor: '#404040',
+	},
+
+	savedProfiles: {
+		width: '100%',
+		backgroundColor: '#161616',
+		justifyContent: 'center',
+		marginTop: 50
+	},
+
+	gameCard: {
+		width: '100%',
 		backgroundColor: '#1f1f1f',
-		height: '100%'
+		padding: 20,
+		marginBottom: 20,
+	},
+
+	profileText: {
+		fontWeight: '500',
+		fontSize: 16,
+		color: '#fff',
+		textTransform: 'none',
+		textAlign: 'left' 
+	},
+
+	btn: {
+		color: '#161616',
+		fontSize: '18px',
+		fontWeight: '700',
+		letterSpacing: '1px',
+		borderBottomColor: '#f50',
+		borderbottomWidth: 2,
+		marginBottom: 5,
+		textTransform: 'uppercase',
+		backgroundColor: '#f50',
+		width: '100%',
+		textAlign: 'center',
+		padding: 15
 	}
-  });
+});

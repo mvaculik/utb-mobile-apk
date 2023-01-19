@@ -6,13 +6,23 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import HomePage from './screens/HomeScreen';
 import UserPage from './screens/UserScreen';
+import SplashScreen from './screens/SplashScreen';
+import ErrorScreen from './screens/ErrorScreen';
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
     <NavigationContainer>
-    <Stack.Navigator>
+    <Stack.Navigator initialRouteName="Splash">
+    <Stack.Screen
+        name="Splash" 
+        component={SplashScreen} 
+        options={{ 
+          headerShown: false,
+          
+        }}
+      />
     <Stack.Screen
         name="Home"
         component={HomePage}
@@ -20,6 +30,8 @@ export default function App() {
           title: 'First screen',
           headerTitleStyle: styles.headerTitle,
           headerStyle: styles.header,
+          gestureEnabled: false,
+          headerBackVisible: false
         }}
       />
       <Stack.Screen
@@ -29,6 +41,17 @@ export default function App() {
           title: 'Profile',
           headerTitleStyle: styles.headerTitle,
           headerStyle: styles.header,
+        }}
+      />
+      <Stack.Screen
+        name="Error"
+        component={ErrorScreen}
+        options={{
+          title: 'Error',
+          headerTitleStyle: styles.headerTitle,
+          headerStyle: styles.header,
+          gestureEnabled: false,
+          headerBackVisible: false
         }}
       />
     </Stack.Navigator>
